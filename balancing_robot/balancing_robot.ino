@@ -15,6 +15,7 @@ const int STEPS_PER_REVOLUTION = 200;
 const double MICROSECONDS_PER_SECOND = 1000000.0;
 const double SECONDS_PER_MINUTE = 60.0;
 const double MAX_PV = 60.0;
+const double DIAGNOSTICS_HERTZ = 5.0;
 
 Adafruit_MMA8451 accelerometer;
 Stepper left_stepper(STEPS_PER_REVOLUTION, 4, 5, 6, 7);
@@ -23,6 +24,7 @@ Stepper right_stepper(STEPS_PER_REVOLUTION, 8, 9, 10, 11);
 double integral = 0;
 double last_error = 0;
 long last_time;
+long last_diagnostics_time;
 double steps = 0;
 
 void setup() {
@@ -89,36 +91,33 @@ void loop() {
   steps = modf(steps, &steps_to_take_right_now);
 
   // Diagnostics
-  Serial.print("E: ");
-  Serial.print(error);
-  Serial.print(" \t\t x: ");
-  Serial.print(x);
-  Serial.print("\t z: ");
-  Serial.print(z);
-  Serial.print("\t Del: ");
-  Serial.print(delta);
-  Serial.print("\t I: ");
-  Serial.print(integral);
-  Serial.print("\t D: ");
-  Serial.print(derivative);
-  Serial.print("\t f: ");
-  Serial.print(steps);
-  Serial.print("\t s: ");
-  Serial.print(steps_to_take_right_now);
-  Serial.print("\t PV: ");
-  Serial.println(process_value);
-
-  // Move the motors
-  while (steps_to_take_right_now != 0) {
-    if (steps_to_take_right_now > 0) {
-      left_stepper.step(-1);
-      right_stepper.step(1);
-      steps_to_take_right_now--;
-    } else {
-      left_stepper.step(1);
-      right_stepper.step(-1);
-      steps_to_take_right_now++;
-    }
+  if ((double(current_time - last_diagnostics_time) / MICROSECONDS_PER_SECOND) > (1 / DIAGNOSTICS_HERTZ)) {
+    last_diagnostics_time = current_time;
+    Serial.print(error);
+    Serial.print(' ');
+    Serial.print(delta);
+    Serial.print(' ');
+    Serial.print(integral);
+    Serial.print(' ');
+    Serial.print(derivative);
+    Serial.print(' ');
+    Serial.print(steps);
+    Serial.print(' ');
+    Serial.print(steps_to_take_right_now);
+    Serial.print(' ');
+    Serial.println(process_value);
   }
-}
 
+ // Move the motors
+ while (steps_to_take_right_now != 0) {
+   if (steps_to_take_right_now > 0) {
+     left_stepper.step(-1);
+     right_stepper.step(1);
+     steps_to_take_right_now--;
+   } else {
+     left_stepper.step(1);
+     right_stepper.step(-1);
+     steps_to_take_right_now++;
+   }
+ }
+}
