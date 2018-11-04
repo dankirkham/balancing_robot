@@ -39,3 +39,20 @@ The robot slipped on smooth surfaces. It seemed to work best on carpet. Future d
 
 #### Step Angle
 The stepper motors moved 1.8° per step. This resulted in very discrete movements from the robot. The wheels could be seen moving like the second-hand on a quartz clock. A future design might make use of a microstepping driver to make wheel movement more continuous.
+
+## Mark 2
+
+### Improvements Over Mark 1
+
+#### Taller Robot
+The robot is now taller and more top heavy. The old robot could sometimes balance by itself with no motor input. This version should be much less stable and require more active control input.
+
+#### Sensors
+In addition to an accelerometer, this version uses a gyroscope. The gyroscope provides angular rate data which is integrated over time to provide positional feedback to the control loop.
+
+The sensor has been moved to be on the same axis of rotation as the wheels. I noticed that with the previous version the robot behaved differently when tilted to one side than the other. This is likely because the sensor was not mounted above/below the center of mass. I expect the sensor to perform best when mounted both under the center of mass and on the axis of rotation.
+
+The sensor is now has some vibration damping. This should improve the accelerometer noise that was a problem on the previous robot. I opted to use double-sided foam because it was easy. I may go down the rabbit hole and experiment with other isolation/damping methods in the future.
+
+#### Filtering
+In order to combine the accelerometer data and the gyroscope data, this robot makes use of a Kalman filter. This is a statistical filter that models the dynamics of the robot to predict its state. It then uses the measurement data to correct the prediction. By taking into account the noise of the system and the measurements, it provides a very reliable prediction of the tilt angle of the robot.
