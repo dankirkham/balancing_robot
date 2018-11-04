@@ -7,13 +7,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('port')
     parser.add_argument('--baudrate', type=int, default=115200)
+    parser.add_argument('-o', help='output-file')
 
     args = parser.parse_args()
 
     queue = Queue()
     signal1, signal2 = Pipe()
 
-    receiver = Receiver(queue, signal1, args.port, baudrate=args.baudrate)
+    receiver = Receiver(queue, signal1, args.port, baudrate=args.baudrate, outfile=args.o)
 
     receiver.start()
 
