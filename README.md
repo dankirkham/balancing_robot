@@ -42,6 +42,25 @@ The stepper motors moved 1.8° per step. This resulted in very discrete movement
 
 ## Mark 2
 
+### Bill of Materials
+
+#### Purchased Parts
+- 2 x NEMA 17 Stepper
+- 1 x Arduino Uno  
+- 2 x Adafruit Motor Shield V2
+- 1 x Adafruit 9-DOF Accel/Mag/Gyro+Temp Breakout Board - LSM9DS1
+- 1 x 3S 11.1 V 1300 mAh LiPo Battery with XT-60 Connector
+- 1 x XT-60 Male Connector
+- Hookup Wire
+- 3M Dual Lock to hold battery
+- 2 x RC car tires ([amazon](https://www.amazon.com/gp/product/B0195WYZKE/))
+
+#### 3D Printed Parts
+- 1 x Chassis
+- 1 x Circuit Mount
+- 2 x Wheels
+- 1 x Support Bracket
+
 ### Improvements Over Mark 1
 
 #### Taller Robot
