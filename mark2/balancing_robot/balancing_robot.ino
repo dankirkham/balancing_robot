@@ -3,6 +3,15 @@
 #include <Adafruit_Sensor.h>
 #include <math.h>
 
+#define BATTERY_PIN A2
+// 11 Volts
+// 509 counts
+// 2.494 V at ADC
+
+// 12 Volts
+// 556 Counts
+// 2.721
+
 const double P = 13;
 const double I = 4;
 const double D = 40;
@@ -20,6 +29,11 @@ const double GYRO_GAIN = 24;
 const double MOVE_THRESHOLD = 5;
 const double INTEGRAL_MAX = 10;
 
+const int BATTERY_CELLS = 3;
+const double MIN_CELL_VOLTAGE = 3.5;
+const double BATTERY_SLOPE = 0.0212766;
+const double BATTERY_INTERCEPT = 0.1702;
+
 Adafruit_LSM9DS1 imu;
 
 Adafruit_MotorShield afms = Adafruit_MotorShield();
@@ -34,8 +48,9 @@ long last_time;
 long last_diagnostics_time;
 double steps = 0;
 int runs = 0;
+boolean motors_stopped = false;
 
-void setup() {
+void setup() { 
   Serial.begin(115200);
 
   imu = Adafruit_LSM9DS1();
@@ -70,6 +85,14 @@ void loop() {
   double delta = double(current_time - last_time) / MICROSECONDS_PER_SECOND;
   last_time = current_time;
   runs += 1;
+
+  // Compute battery voltage
+  double voltage = analogRead(BATTERY_PIN) * BATTERY_SLOPE + BATTERY_INTERCEPT;
+  double cell_voltage = voltage / BATTERY_CELLS;
+
+  if (!motors_stopped && cell_voltage < MIN_CELL_VOLTAGE) {
+    motors_stopped = true;
+  }
 
   // Find Error
   sensors_event_t accel, mag, gyro, temp;
@@ -148,11 +171,22 @@ void loop() {
     Serial.print(process_value);
     Serial.print(' ');
     Serial.print(runs);
+    Serial.print(' ');
+    Serial.print(cell_voltage);
+    if (motors_stopped) {
+      Serial.print(" UV FAULT");
+    }
     Serial.print('\n');
     runs = 0;
   }
 
-//   Move the motors
+  if (motors_stopped) {
+    left_stepper->release();
+    right_stepper->release();
+    return;
+  }
+
+  //   Move the motors
   while (steps_to_take_right_now != 0) {
     if (steps_to_take_right_now >= 32) {
       left_stepper->onestep(BACKWARD, DOUBLE);
